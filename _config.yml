@@ -1,16 +1,5 @@
-# Site settings
-title: "Colin Atkinson's Home Page"
-email: 114d71d1@opayq.com
-description: "Student &nbsp;&bull;&nbsp; Programmer &nbsp;&bull;&nbsp; Nerdy fucker"
-baseurl: ""
-url: "https://colatkinson.github.io"
-twitter_username: colinatkinson65
-github_username:  colatkinson
-name: "Colin Atkinson"
-
-sass:
-    sass_dir: _sass
-
-# Build settings
-markdown: kramdown
-permalink: pretty
+# General Jekyll Config
+highlighter: pygments
+url: http://example.com
+lsi: false
+exclude: [LICENSE, CNAME, README.md, .gitignore, Gemfile, Gemfile.lock]
