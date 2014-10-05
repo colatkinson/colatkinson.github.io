@@ -5,10 +5,12 @@
   </a>
   <h2>I'm <a href="/">{{ site.data.theme.name }}</a>.</h2>
   <div id="bio">
-    <p>A brief bio or something witty.</p>
-    <p>
-      Edit me in <code>_includes/sidebar.html</code>
-    </p>
+    <p>{{ site.data.theme.tagline }}</p>
+  </div>
+  <div id="nav">
+    <p><a href="/index.html">Blog Posts</a></p>
+    <p><a href="/projects.html">Projects</a></p>
+    <p><a href="/about.html">About</a></p>
   </div>
   <div id="social">
     {% include social.html %}

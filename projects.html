@@ -1,0 +1,19 @@
+---
+layout: page
+title: Projects
+---
+
+<!--<link rel="style" href="" />
+<link rel="stylesheet" href="/assets/css/style-">-->
+<ul class="proj_list">
+{% for proj_hash in site.data.projects %}
+{% assign proj = proj_hash[1] %}
+    <li class="proj">
+        <a href="{{ proj.url }}"><img src="{{ proj.img }}" /></a>
+        <div class="proj_info">
+            <div class="proj_name">{{ proj.name }}</div>
+            <div class="proj_desc">{{ proj.desc }}</div>
+        </div>
+    </li>
+{% endfor %}
+</ul>
