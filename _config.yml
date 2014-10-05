@@ -1,6 +1,26 @@
-# General Jekyll Config
-highlighter: pygments
-url: http://colatkinson.github.io
-lsi: false
-exclude: [LICENSE, CNAME, README.md, .gitignore, Gemfile, Gemfile.lock]
-baseurl: /
+# Dependencies
+markdown:            redcarpet
+highlighter:         pygments
+
+# Permalinks
+#
+# Use of `relative_permalinks` ensures post links from the index work properly.
+permalink:           pretty
+relative_permalinks: true
+
+# Setup
+title:               Colin Atkinson
+tagline:             'Student and Programmer'
+description:         "This is Colin\'s personal page. For contact info, see the about page."
+url:                 http://colatkinson.github.io
+baseurl:             /
+paginate:            5
+
+# About/contact
+author:
+  name:              Colin Atkinson
+  url:               https://twitter.com/colinatkinson65
+  email:             114d71d1@opayq.com
+
+# Custom vars
+version:             1.0.0
