@@ -1,4 +1,4 @@
-Follow me:
+<!--Follow me:-->
 <div id="stalker">
   {% if site.data.theme.social.github %}
   <a title="{{ site.data.theme.social.github }} on Github" href="https://github.com/{{ site.data.theme.social.github }}">
@@ -60,6 +60,12 @@ Follow me:
   {% if site.data.theme.social.gplus %}
   <a title="{{ site.data.theme.name }} on Google Plus" href="https://plus.google.com/{{ site.data.theme.social.gplus }}">
     <i class="fa fa-google-plus-square"></i>
+  </a>
+  {% endif %}
+
+  {% if site.author.email %}
+  <a title="{{ site.data.theme.name }}'s Email" href="mailto:{{ site.author.email }}">
+    <i class="fa fa-envelope"></i>
   </a>
   {% endif %}
 
