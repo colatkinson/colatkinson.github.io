@@ -1,0 +1,18 @@
+<nav>
+  <h1>Hi.</h1>
+  <a href="/">
+    <img src="/logo.png" id="logo" alt="Blog logo"/>
+  </a>
+  <h2>I'm <a href="/">{{ site.data.theme.name }}</a>.</h2>
+  <div id="bio">
+    <p>{{ site.data.theme.tagline }}</p>
+  </div>
+  <div id="nav">
+    <p><a href="/index.html">Blog Posts</a></p>
+    <p><a href="/projects.html">Projects</a></p>
+    <p><a href="/about.html">About</a></p>
+  </div>
+  <div id="social">
+    {% include social.html %}
+  </div>
+</nav>

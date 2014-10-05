@@ -1,0 +1,4 @@
+name: SmokeOS
+desc: A simple kernel I'm using to learn about low-level programming.
+img: /assets/images/smokeos.png
+url: https://github.com/colatkinson/simple_os
