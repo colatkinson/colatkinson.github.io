@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Example content
+title: Making a Talking Arduino Oracle
 ---
 
 
