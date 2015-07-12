@@ -1,25 +1,46 @@
 ---
-layout: default
+layout: base
 ---
+<body style="padding: 0">
 
-<div class="post">
-  <h1 class="post-title">{{ page.title }}</h1>
-  <span class="post-date">{{ page.date | date_to_string }}</span>
-  {{ content }}
-</div>
+  <article class="post-full">
+    <header class="bg-holder post-page {% if page.color %}bg-{{ page.color }}{% endif %}" style="{% if page.cover %}background:url({{page.cover}}) no-repeat center center{% endif %}">
+      <a href="{{site.url}}/" class="overlay"><i class="fa fa-home fa-2x"></i></a>
+      {% if page.cover %}<div class="img-overlay"></div>{% endif %}
+      <h1><a href="{{page.url}}">{{ page.title }}</a></h1>
+    </header>
+    <div class="mui-container-fluid post-content">
+      <p class="post-meta">by <a href="{{ site.url }}">{% if page.author %}{{ page.author }}{% else %}{{ site.full_name }}{% endif %}</a> on <time datetime="{{ page.date | date: "%Y-%m-%dT%H:%M" }}"><i class="fa fa-calendar"></i>{{ page.date | date: "%B %-d, %Y" }}</time>
+      <span class="sharer">
+        Share on: 
+        <a class="sh-fb" href="#" target="_blank" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u='+window.location.href,'_blank','height=300,width=600');return false;"><i class="fa fa-facebook fa-lg"></i></a>
+        {% if site.twitter %}
+            <a class="sh-twt" href="#" target="_blank" onclick="window.open('https://twitter.com/share?url='+window.location.href+'&via={{ site.twitter }}','_blank','height=300,width=600');return false;"><i class="fa fa-twitter fa-lg"></i></a>
+        {% else %}
+            <a class="sh-twt" href="#" target="_blank" onclick="window.open('https://twitter.com/share?url='+window.location.href,'_blank','height=300,width=600');return false;"><i class="fa fa-twitter fa-lg"></i></a>
+        {% endif %}
+        </span>
+      </p>
+      {% if page.tags and page.tags.size > 0 %}
+        <p class="post-tag-container">
+            {% for tag in page.tags %}
+            <span class="post-tag"><i class="fa fa-tag"></i>{{ tag }}</span>
+            {% endfor %}
+        </p>
+      {% endif %}
+      <div class="post-html">
+          {{ content }}
+      </div>
+    {% if site.disqus %}
+    <footer>
+      <p><a href="#" id="showComments"><i class="fa fa-comment-o"></i>Comments</a></p>
+      <div id="disqus_thread"></div>
+    </footer>
+    {% endif %}
+    </div>
+  </article>
 
-<div class="related">
-  <h2>Related Posts</h2>
-  <ul class="related-posts">
-    {% for post in site.related_posts limit:3 %}
-      <li>
-        <h3>
-          <a href="{{ site.baseurl }}{{ post.url }}">
-            {{ post.title }}
-            <small>{{ post.date | date_to_string }}</small>
-          </a>
-        </h3>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
+  {% if site.disqus %}
+  <script src="/js/script.js"></script>
+  {% endif %}
+

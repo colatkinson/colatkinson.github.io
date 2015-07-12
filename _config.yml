@@ -1,28 +1,35 @@
-# Dependencies
+# Site settings
+## Change the values as needed.
+title: Bitwiser-Material
+email: your-email@domain.com
+description: > # this means to ignore newlines until "keywords:"
+  This is Colin\'s personal page. For contact info, see the about page.
+keywords: "some, relevant, keywords, for, usage, in metatags"
+url: "http://bitwiser.in/bitwiser-material" # the base hostname & protocol for your site
+baseurl: "" # the subpath of your site, e.g. /blog/
+paginate: 5
+paginate_path: "page:num"
+# Build settings
 markdown:            redcarpet
 highlighter:         pygments
 redcarpet:
   extensions: ["no_intra_emphasis", "fenced_code_blocks", "autolink", "tables", "with_toc_data"]
+sass:
+  sass_dir: _sass
+  style: :compressed
+links:
+  facebook: colin.william.atkinson
+  twitter: colinatkinson65
+  email: 114d71d1@opayq.com
+  github: colatkinson
+exclude:
+  - bower_components
+  - README.md
+full_name: Brijesh
 
-# Permalinks
-#
-# Use of `relative_permalinks` ensures post links from the index work properly.
-permalink:           pretty
-relative_permalinks: true
+##set this to enable disqus commenting
+#disqus: forumname
 
-# Setup
-title:               Colin Atkinson
-tagline:             'Student and Programmer'
-description:         "This is Colin\'s personal page. For contact info, see the about page."
-url:                 http://colatkinson.github.io
-baseurl:             /
-paginate:            5
-
-# About/contact
-author:
-  name:              Colin Atkinson
-  url:               https://twitter.com/colinatkinson65
-  email:             114d71d1@opayq.com
-
-# Custom vars
-version:             1.0.0
+##set this to enable google analytics
+#ga_id: analyticsID
+#ga_domain: bitwiser.in

@@ -1,6 +1,8 @@
 ---
 layout: page
-title: About Me
+title: About
+color: indigo
+permalink: /about/
 ---
 
 I'm a student at Sleepy Hollow High School. My hobbies include programming, playing the trumpet, and fencing.
