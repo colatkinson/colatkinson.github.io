@@ -2,6 +2,7 @@
 layout: page
 title: About
 color: indigo
+cover: /assets/images/IMG_20150625_205921_crop.jpg
 permalink: /about/
 ---
 
