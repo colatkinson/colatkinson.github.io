@@ -7,6 +7,10 @@ categories:
 - science
 ---
 
+A methodology for using machine learning techniques to make predictions on forex markets
+
+---
+
 ## Abstract
 
 The purpose of this project was to design a methodology for the use of neural networks to predict the value movements of foreign exchange rates. Neural networks have gained attention due to their ability to make predictions on nonlinear data. This technique has been applied in the area of financial markets, where neural networks have been able to make fairly accurate predictions. In other fields, genetic algorithms have been shown to be capable of improving the results of neural networks by determining the optimal architecture of neural networks. In this project, this approach of using genetic algorithms to design neural network architecture was evaluated for networks being used to make predictions on financial data. It proved successful, with high prediction accuracies for  the British Pound, the Japanese Yen, and the German Mark. Additionally, the networks had the ability to consistently outperform the market in simulations, achieving an average 71.3% accuracy for the German Mark, 68.2% for the British Pound, and 68.4% for the Japanese Yen, all of which are greater than the 50% minimum needed to show predictive ability. It is clear from these results that using neural networks and genetic algorithms provides an adaptable method for currency value prediction.
