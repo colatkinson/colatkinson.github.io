@@ -1,6 +1,8 @@
 ---
 layout: post
 title: Using Neural Networks and Genetic Algorithms to Predict Foreign Exchange Rates
+cover: /assets/images/Forex2.png
+color: blue
 categories:
 - science
 ---

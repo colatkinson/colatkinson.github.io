@@ -1,6 +1,9 @@
 ---
 layout: post
 title: Making a Talking Arduino Oracle
+cover: /assets/images/IMG_20141009_074612.jpg
+color: black-87
+categories: engineering
 ---
 
 
