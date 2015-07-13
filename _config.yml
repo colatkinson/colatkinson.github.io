@@ -1,11 +1,11 @@
 # Site settings
 ## Change the values as needed.
-title: Bitwiser-Material
-email: your-email@domain.com
+title: Colin Atkinson
+email: 114d71d1@opayq.com
 description: > # this means to ignore newlines until "keywords:"
   This is Colin\'s personal page. For contact info, see the about page.
 keywords: "some, relevant, keywords, for, usage, in metatags"
-url: "http://bitwiser.in/bitwiser-material" # the base hostname & protocol for your site
+# url: "http://bitwiser.in/bitwiser-material" # the base hostname & protocol for your site
 baseurl: "" # the subpath of your site, e.g. /blog/
 paginate: 5
 paginate_path: "page:num"
@@ -25,7 +25,7 @@ links:
 exclude:
   - bower_components
   - README.md
-full_name: Brijesh
+full_name: Colin Atkinson
 
 ##set this to enable disqus commenting
 #disqus: forumname

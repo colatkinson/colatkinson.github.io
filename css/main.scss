@@ -393,3 +393,11 @@ article {
         }
     }
 }
+
+.proj {
+    list-style: none;
+
+    .proj_name {
+        font-weight: bold;
+    }
+}
