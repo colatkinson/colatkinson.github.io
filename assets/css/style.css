@@ -1,0 +1,34 @@
+body {
+    margin:40px
+    auto;max-width:650px;
+    line-height:1.6;
+    font-size:18px;
+    color:#444;
+    padding:0 10px;
+    font-family: 'Muli', sans-serif;
+}
+
+h1 {
+    font-size: 2em;
+}
+
+h1, h2, h3 {
+    line-height:1.0;
+}
+
+a {
+    color: inherit;
+}
+
+.post-link {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+.post-list {
+    list-style: none;
+}
+
+.post-meta {
+    color: #888;
+}
