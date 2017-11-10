@@ -1,0 +1,31 @@
+---
+layout: default
+---
+
+<div class="home">
+
+  {{ content }}
+
+  <ul class="post-list">
+    {% for post in site.posts %}
+      <li>
+        <h2>
+          <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
+        </h2>
+
+        <span class="post-meta">
+            <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+                {% assign date_format = site.minima.date_format | default: "%d %b %Y" %}
+                {{ post.date | date: date_format }}
+            </time>
+        </span>
+
+        <span class="post-excerpt">{{ post.excerpt }}</span>
+
+      </li>
+    {% endfor %}
+  </ul>
+
+  <!-- <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p> -->
+
+</div>
