@@ -6,8 +6,6 @@ layout: default
 
   {{ content }}
 
-  <h1 class="page-heading">Posts</h1>
-
   <ul class="post-list">
     {% for post in site.posts %}
       <li>
@@ -15,8 +13,12 @@ layout: default
           <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title | escape }}</a>
         </h2>
 
-        {% assign date_format = site.minima.date_format | default: "%b %-d, %Y" %}
-        <span class="post-meta">{{ post.date | date: date_format }}</span>
+        <span class="post-meta">
+            <time datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+                {% assign date_format = site.minima.date_format | default: "%d %b %Y" %}
+                {{ post.date | date: date_format }}
+            </time>
+        </span>
 
         <span class="post-excerpt">{{ post.excerpt }}</span>
 
