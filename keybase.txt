@@ -1,0 +1,55 @@
+==================================================================
+https://keybase.io/colatkinson
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of https://colatkinson.site
+  * I am colatkinson (https://keybase.io/colatkinson) on keybase.
+  * I have a public key ASB2s4QBQdpturKJY8dUh4Lj4xGBHFYuPklRnTXWVv83HAo
+
+To do so, I am signing this object:
+
+{
+  "body": {
+    "key": {
+      "eldest_kid": "010122498f542e967ca21260a054104ef9252cefd5bf109405782eea4308be530ff40a",
+      "host": "keybase.io",
+      "kid": "012076b3840141da6dbab28963c7548782e3e311811c562e3e49519d35d656ff371c0a",
+      "uid": "eabc28cd585cbf4099d5de620139e019",
+      "username": "colatkinson"
+    },
+    "merkle_root": {
+      "ctime": 1511300599,
+      "hash": "1b4a002713a6482148ee7cca966211bade2f888d3cec1448b12968080326c5c0a9a5821213dd8f62a6863f314d9d8ccc6f98efdc194be8329962966ea25fc87f",
+      "hash_meta": "de35d7c2765563e641500b0f364d1121dcfb90baea24efad48d73038a8c09d76",
+      "seqno": 1728069
+    },
+    "service": {
+      "hostname": "colatkinson.site",
+      "protocol": "https:"
+    },
+    "type": "web_service_binding",
+    "version": 1
+  },
+  "client": {
+    "name": "keybase.io go client",
+    "version": "1.0.35"
+  },
+  "ctime": 1511300611,
+  "expire_in": 504576000,
+  "prev": "26ead42f8205868ee67db021eefb03cc913c0d26fc27b290712e9bc663781699",
+  "seqno": 22,
+  "tag": "signature"
+}
+
+which yields the signature:
+
+hKRib2R5hqhkZXRhY2hlZMOpaGFzaF90eXBlCqNrZXnEIwEgdrOEAUHabbqyiWPHVIeC4+MRgRxWLj5JUZ011lb/NxwKp3BheWxvYWTFA0x7ImJvZHkiOnsia2V5Ijp7ImVsZGVzdF9raWQiOiIwMTAxMjI0OThmNTQyZTk2N2NhMjEyNjBhMDU0MTA0ZWY5MjUyY2VmZDViZjEwOTQwNTc4MmVlYTQzMDhiZTUzMGZmNDBhIiwiaG9zdCI6ImtleWJhc2UuaW8iLCJraWQiOiIwMTIwNzZiMzg0MDE0MWRhNmRiYWIyODk2M2M3NTQ4NzgyZTNlMzExODExYzU2MmUzZTQ5NTE5ZDM1ZDY1NmZmMzcxYzBhIiwidWlkIjoiZWFiYzI4Y2Q1ODVjYmY0MDk5ZDVkZTYyMDEzOWUwMTkiLCJ1c2VybmFtZSI6ImNvbGF0a2luc29uIn0sIm1lcmtsZV9yb290Ijp7ImN0aW1lIjoxNTExMzAwNTk5LCJoYXNoIjoiMWI0YTAwMjcxM2E2NDgyMTQ4ZWU3Y2NhOTY2MjExYmFkZTJmODg4ZDNjZWMxNDQ4YjEyOTY4MDgwMzI2YzVjMGE5YTU4MjEyMTNkZDhmNjJhNjg2M2YzMTRkOWQ4Y2NjNmY5OGVmZGMxOTRiZTgzMjk5NjI5NjZlYTI1ZmM4N2YiLCJoYXNoX21ldGEiOiJkZTM1ZDdjMjc2NTU2M2U2NDE1MDBiMGYzNjRkMTEyMWRjZmI5MGJhZWEyNGVmYWQ0OGQ3MzAzOGE4YzA5ZDc2Iiwic2Vxbm8iOjE3MjgwNjl9LCJzZXJ2aWNlIjp7Imhvc3RuYW1lIjoiY29sYXRraW5zb24uc2l0ZSIsInByb3RvY29sIjoiaHR0cHM6In0sInR5cGUiOiJ3ZWJfc2VydmljZV9iaW5kaW5nIiwidmVyc2lvbiI6MX0sImNsaWVudCI6eyJuYW1lIjoia2V5YmFzZS5pbyBnbyBjbGllbnQiLCJ2ZXJzaW9uIjoiMS4wLjM1In0sImN0aW1lIjoxNTExMzAwNjExLCJleHBpcmVfaW4iOjUwNDU3NjAwMCwicHJldiI6IjI2ZWFkNDJmODIwNTg2OGVlNjdkYjAyMWVlZmIwM2NjOTEzYzBkMjZmYzI3YjI5MDcxMmU5YmM2NjM3ODE2OTkiLCJzZXFubyI6MjIsInRhZyI6InNpZ25hdHVyZSJ9o3NpZ8RA55f1xIwgcW5Am8hYkEU130HPD2p803QRy/94nD1q6W4JgKlFEsYjZspWPbgSmodaqP6JSEkgkK3YTcyVmVpgCqhzaWdfdHlwZSCkaGFzaIKkdHlwZQildmFsdWXEIMiuE+PJ07DKz/T4o4yNBOfKNVexg2w/soTUnmy0jnm3o3RhZ80CAqd2ZXJzaW9uAQ==
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/colatkinson
+
+==================================================================
