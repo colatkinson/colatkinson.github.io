@@ -68,15 +68,20 @@ def run_test(path: str, gen_fn: Callable[[int], str]) -> None:
     except OSError:
         # We expect the creation of one of the named streams to fail with
         # errno 22.
-        # TODO: Find out what that's being translated from
         print(path, ct)
 
 
 if __name__ == "__main__":
     run_test("a.txt", gen_sha256)
     run_test("b.txt", gen_sha128)
+```
 
-    # TODO: Get output to show
+This will output something like
+
+```bash
+$ python named_streams.py
+a.txt 1637
+b.txt 2729
 ```
 
 # TODO: Finish
