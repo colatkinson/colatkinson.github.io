@@ -1,12 +1,14 @@
 ---
 layout: post
-title:  "Putting the ADS in Madness"
+title:  "Yeah, I eat ADS"
 date:   2019-04-30 17:38:00 -0500
 categories: windows ntfs
 author: Colin Atkinson
 ---
 
-Alternate Data Streams are a lesser known bit of NTFS weirdness. You can think of them as sort of like xattrs on Linux, except they are treated (kinda) exactly like files instead of as a special thing. Or as a macOS resource fork, compatibility with which was the original reason they were created.
+While I was attempting to write a <s>horrific hack that makes puppies cry</s> wonderfully elegant piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file. How did I hit this maximum? Just... don't worry about it, ok? Regardless, while looking into this, I found out an even weirder part: that this maximum number actually depends on the length of the streams' names.
+
+Alternate Data Streams are a lesser known bit of NTFS weirdness. They're similar to xattrs on Linux, except you don't need a special API to read and write data to them. Just pop them open like any other file. They are also extremely similar to macOS resource forks--in fact, they were originally created for compatibility between the two systems.
 
 The tl;dr version is as follows:
 
@@ -32,6 +34,7 @@ There seems to be a maximum number of named streams per file. This in and of its
 ### The Proof
 
 ```python
+#!/usr/bin/env python3
 import hashlib
 import os
 from typing import Callable
@@ -48,6 +51,24 @@ def gen_sha128(val: int) -> str:
     orig = gen_sha256(val)
 
     return orig[:32]
+
+
+def gen_sha64(val: int) -> str:
+    orig = gen_sha256(val)
+
+    return orig[:16]
+
+
+def gen_sha32(val: int) -> str:
+    orig = gen_sha256(val)
+
+    return orig[:8]
+
+
+def gen_sha24(val: int) -> str:
+    orig = gen_sha256(val)
+
+    return orig[:6]
 
 
 def run_test(path: str, gen_fn: Callable[[int], str]) -> None:
@@ -74,7 +95,12 @@ def run_test(path: str, gen_fn: Callable[[int], str]) -> None:
 if __name__ == "__main__":
     run_test("a.txt", gen_sha256)
     run_test("b.txt", gen_sha128)
+    run_test("c.txt", gen_sha64)
+    run_test("d.txt", gen_sha32)
+    run_test("e.txt", gen_sha24)
 ```
+
+## Testing
 
 This will output something like
 
@@ -82,7 +108,85 @@ This will output something like
 $ python named_streams.py
 a.txt 1637
 b.txt 2729
+c.txt 4094
+d.txt 5458
+e.txt 6550
 ```
+
+Interestingly enough, using Linux's `ntfs-3g` driver, we seem to get identical results.
+
+```bash
+$ fallocate -l 4G ntfs.img
+$ sudo losetup -f --show ntfs.img
+/dev/loop0
+$ sudo mkfs.ntfs /dev/loop0
+$ sudo losetup -d /dev/loop0
+$ mkdir ntfs_mnt
+$ ntfs-3g -o streams_interface=windows,no_def_opts,silent ntfs.img ntfs_mnt
+$ cd ntfs_mnt
+$ ~/named_streams.py
+a.txt 1637
+b.txt 2729
+c.txt 4094
+d.txt 5458
+e.txt 6550
+$ fusemount -u ntfs_mnt
+```
+
+This suggests one of two things:
+
+ 1. This is an actual technical limitation of NTFS, or
+ 2. `ntfs-3g` decided to maintain compatibility with the Microsoft implementation
+
+Either way, at least we know that somewhere in some actually accessible code, there is an explanation for this weirdness.
+
+### Hypothesis: It's related to cluster size
+
+It seems entirely reasonable that NTFS has a limit on how many clusters to allocate for a given file's MFT entries. This, however does not seem to be the case. Repeating the commands above, adding the `--cluster-size 8192` option to mkfs.ntfs does not seem to have an affect.
+
+### Hypothesis: It's related to MFT size
+
+Again, repeat the above commands and add `-z 4` (MFT takes up 50% of the disk) to `mkfs.ntfs`. However, it still appears to make no difference.
+
+### A Clue
+
+I decided I might as well check the system logs for any hints as to what `ntfs-3g` was doing. A `journalctl` later, and...
+
+```
+May 09 00:38:37 tenax ntfs-3g[28732]: Too large attrlist (262208): Numerical result out of range
+May 09 00:38:37 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
+May 09 00:38:37 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
+May 09 00:38:38 tenax ntfs-3g[28732]: Too large attrlist (262208): Numerical result out of range
+May 09 00:38:38 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
+May 09 00:38:38 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
+May 09 00:38:39 tenax ntfs-3g[28732]: Too large attrlist (262208): Numerical result out of range
+May 09 00:38:39 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
+May 09 00:38:39 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
+May 09 00:38:41 tenax ntfs-3g[28732]: Too large attrlist (262160): Numerical result out of range
+May 09 00:38:41 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
+May 09 00:38:41 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
+May 09 00:38:43 tenax ntfs-3g[28732]: Too large attrlist (262168): Numerical result out of range
+May 09 00:38:43 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
+May 09 00:38:43 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
+```
+
+Ok, this is interesting. What happens if we `grep` the source for "Too large attrlist"? This finds the following snippet in `libntfs-3g/attrib.c`.
+
+```c
+/*
+ * $ATTRIBUTE_LIST shouldn't be greater than 0x40000, otherwise 
+ * Windows would crash. This is not listed in the AttrDef.
+ */
+if (type == AT_ATTRIBUTE_LIST && size > 0x40000) {
+    errno = ERANGE;
+    ntfs_log_perror("Too large attrlist (%lld)", (long long)size);
+    return -1;
+}
+```
+
+What seems to be happening is that as we add more and more ADSes, the MFT entry eventually has to resort to using `$ATTRIBUTE_LIST` so that the entry can be split across multiple blocks. Something that isn't mentioned in the NTFS documentation, however, is that `$ATTRIBUTE_LIST` itself actually has a maximum size.
+
+Since this seems to be a fairly arbitrary limitation, let's see what happens if we change this value.
 
 # TODO: Finish
 
