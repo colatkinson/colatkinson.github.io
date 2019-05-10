@@ -6,7 +6,7 @@ categories: windows ntfs
 author: Colin Atkinson
 ---
 
-While I was attempting to write a <s>horrific hack that makes puppies cry</s> wonderfully elegant piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file. How did I hit this maximum? Just... don't worry about it, ok? Regardless, while looking into this, I found out an even weirder part: that this maximum number actually depends on the length of the streams' names.
+While I was attempting to write a <s>horrific hack</s> wonderfully elegant piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file. How did I hit this maximum? Just... don't worry about it, ok? Regardless, while looking into this, I found out an even weirder part: that this maximum number actually depends on the length of the streams' names.
 
 Alternate Data Streams are a lesser known bit of NTFS weirdness. They're similar to xattrs on Linux, except you don't need a special API to read and write data to them. Just pop them open like any other file. They are also extremely similar to macOS resource forks--in fact, they were originally created for compatibility between the two systems.
 
@@ -29,7 +29,7 @@ The `$DATA` attribute header contains much what you would expect--its own length
 
 ## The Weird Part
 
-There seems to be a maximum number of named streams per file. This in and of itself isn't that strange. The weird part is that this number seems to vary with the length of the streams' names.
+There seems to be a maximum number of named streams per file. This in and of itself isn't that strange: the error code returned is `ERROR_FILE_SYSTEM_LIMITATION (0x299)`, which I guess, like, fair enough NTFS. You do you homie. The weird part is that this number seems to vary with the length of the streams' names.
 
 ### The Proof
 
@@ -186,7 +186,34 @@ if (type == AT_ATTRIBUTE_LIST && size > 0x40000) {
 
 What seems to be happening is that as we add more and more ADSes, the MFT entry eventually has to resort to using `$ATTRIBUTE_LIST` so that the entry can be split across multiple blocks. Something that isn't mentioned in the NTFS documentation, however, is that `$ATTRIBUTE_LIST` itself actually has a maximum size.
 
-Since this seems to be a fairly arbitrary limitation, let's see what happens if we change this value.
+Since this seems to be a fairly arbitrary limitation, let's see what happens if we change this value to, say `0x80000` instead.
+
+```bash
+$ ~/named_streams.py
+a.txt 3276
+b.txt 5460
+c.txt 8190
+d.txt 10920
+e.txt 13110
+```
+
+Well, that certainly seems to do it.
+
+This limit does seem to be documented in a few places, such as [this Microsoft TechNet blog entry from 2011](https://blogs.technet.microsoft.com/mikelag/2011/02/09/how-fragmentation-on-incorrectly-formatted-ntfs-volumes-affects-exchange/):
+
+> NTFS does have it’s limitations with the overall size of this attribute list per file and can have roughly around 1.5 million fragments. This is not an absolute maximum, but is around the area when problems can occur. The FAL size will never shrink and will continually keep growing over time. The maximum supported size of the ATTRIBUTE_LIST is 256K or 262144 [or 0x40000].
+
+And in [The Four Stages of NTFS File Growth, Part 2](https://blogs.technet.microsoft.com/askcore/2015/03/12/the-four-stages-of-ntfs-file-growth-part-2/):
+
+> NOTE: The diagram shows the attribute list as being smaller than the 1kb file record. And while it is true that it starts out that way, the upper limitation of the attribute list is 256kb.
+
+Since the names of streams take up space in the MFT entry, it makes sense that longer names fill up the child entries referred to by `$ATTRIBUTE_LIST` more quickly. Thus leading to more entries being added, and thus hitting the 256kb limit more quickly. So really, it was in fact a literal limitation of the filesystem.
+
+## Conclusion
+
+So in conclusion, it's a weird undocumented limitation that was likely added for performance reasons, and then faithfully duplicated by NTFS-3G.
+
+I guess that the real lesson here is that if you play stupid games (writing thousands of ADSes), you win stupid prizes (things breaking). But, on the plus side I learned a lot about NTFS that I will realistically never use in my life.
 
 # TODO: Finish
 
@@ -197,3 +224,5 @@ Since this seems to be a fairly arbitrary limitation, let's see what happens if 
 * [NTFS Attributes; Non Resident and No Named Attributes](http://sabercomlogica.com/en/ebook/ntfs-non-resident-and-no-named-attributes/)--Detailed technical information on the structure of MFT attributes.
 * [Introduction to ADS](https://hshrzd.wordpress.com/2016/03/19/introduction-to-ads-alternate-data-streams/)--a high-level overview of the history of and how to interact with named streams.
 * [Alternate Data Streams: Out of the Shadows and into the Light](https://www.giac.org/paper/gcwn/230/alternate-data-streams-shadows-light/104234)--a fairly in-depth overview of `$DATA` and the MFT. I also like it because the title could also work for a really cheesy sci-fi or fantasy novel.
+* [`$ATTRIBUTE_LIST`](https://flatcap.org/linux-ntfs/ntfs/attributes/attribute_list.html)--a fairly technical view.
+* [The Four Stages of NTFS File Growth](https://blogs.technet.microsoft.com/askcore/2009/10/16/the-four-stages-of-ntfs-file-growth/)--an extremely in depth overview of how files grow, and how `$ATTRIBUTE_LIST` works.
