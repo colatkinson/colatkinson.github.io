@@ -71,3 +71,8 @@ a {
     overflow: auto;
     max-width: 100%;
 }
+
+blockquote {
+    border-left: 0.5em solid #444;
+    padding-left: 0.5em;
+}
