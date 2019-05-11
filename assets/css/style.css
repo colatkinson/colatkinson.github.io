@@ -88,6 +88,10 @@ blockquote {
     padding-left: 0.5em;
 }
 
+.post img {
+    max-width: 100%;
+}
+
 .highlight .lineno {
   color: #ccc;
   padding: 0 5px;
