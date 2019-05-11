@@ -87,3 +87,22 @@ blockquote {
     border-left: 0.5em solid #c25151;
     padding-left: 0.5em;
 }
+
+.highlight .lineno {
+  color: #ccc;
+  padding: 0 5px;
+  border-right: 1px solid #ccc;
+  text-align: right;
+}
+
+.highlight pre, .highlight code, code.highlighter-rouge {
+    font-family: "Fira Code", "Fira Mono", Consolas, "Lucida Sans Typewriter", "Courier New", Monaco, monospace;
+}
+
+.highlight pre, .highlight code {
+  font-size: 0.875em;
+  display: block;
+  white-space: pre;
+  overflow-x: auto;
+  word-wrap: normal;
+}
