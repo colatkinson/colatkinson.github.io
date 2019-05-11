@@ -34,70 +34,7 @@ There seems to be a maximum number of named streams per file. This in and of its
 ### The Proof
 
 ```python
-#!/usr/bin/env python3
-import hashlib
-import os
-from typing import Callable
-
-
-def gen_sha256(val: int) -> str:
-    m = hashlib.sha256()
-    m.update(str(val).encode("utf8"))
-
-    return m.hexdigest()
-
-
-def gen_sha128(val: int) -> str:
-    orig = gen_sha256(val)
-
-    return orig[:32]
-
-
-def gen_sha64(val: int) -> str:
-    orig = gen_sha256(val)
-
-    return orig[:16]
-
-
-def gen_sha32(val: int) -> str:
-    orig = gen_sha256(val)
-
-    return orig[:8]
-
-
-def gen_sha24(val: int) -> str:
-    orig = gen_sha256(val)
-
-    return orig[:6]
-
-
-def run_test(path: str, gen_fn: Callable[[int], str]) -> None:
-    # Remove anything leftover from a previous run
-    if os.path.exists(path):
-        os.unlink(path)
-
-    with open(path, "w") as f:
-        f.write("F")
-
-    ct = 0
-    try:
-        # Try to create up to 10000 named streams
-        for ct in range(10000):
-            # The form ends up being [path]:[64 or 32 bytes]
-            with open(f"{path}:{gen_fn(ct)}", "w") as f:
-                f.write("F")
-    except OSError:
-        # We expect the creation of one of the named streams to fail with
-        # errno 22.
-        print(path, ct)
-
-
-if __name__ == "__main__":
-    run_test("a.txt", gen_sha256)
-    run_test("b.txt", gen_sha128)
-    run_test("c.txt", gen_sha64)
-    run_test("d.txt", gen_sha32)
-    run_test("e.txt", gen_sha24)
+{% include_relative scripts/named_streams.py %}
 ```
 
 ## Testing
@@ -150,24 +87,12 @@ Again, repeat the above commands and add `-z 4` (MFT takes up 50% of the disk) t
 
 ### A Clue
 
-I decided I might as well check the system logs for any hints as to what `ntfs-3g` was doing. A `journalctl` later, and...
+I decided I might as well check the system logs for any hints as to what `ntfs-3g` was doing. A quick `journalctl` later, and...
 
 ```
-May 09 00:38:37 tenax ntfs-3g[28732]: Too large attrlist (262208): Numerical result out of range
-May 09 00:38:37 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
-May 09 00:38:37 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
-May 09 00:38:38 tenax ntfs-3g[28732]: Too large attrlist (262208): Numerical result out of range
-May 09 00:38:38 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
-May 09 00:38:38 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
-May 09 00:38:39 tenax ntfs-3g[28732]: Too large attrlist (262208): Numerical result out of range
-May 09 00:38:39 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
-May 09 00:38:39 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
-May 09 00:38:41 tenax ntfs-3g[28732]: Too large attrlist (262160): Numerical result out of range
-May 09 00:38:41 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
-May 09 00:38:41 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
-May 09 00:38:43 tenax ntfs-3g[28732]: Too large attrlist (262168): Numerical result out of range
-May 09 00:38:43 tenax ntfs-3g[28732]: ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
-May 09 00:38:43 tenax ntfs-3g[28732]: Failed to add resident attribute: Numerical result out of range
+Too large attrlist (262208): Numerical result out of range
+ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of range
+Failed to add resident attribute: Numerical result out of range
 ```
 
 Ok, this is interesting. What happens if we `grep` the source for "Too large attrlist"? This finds the following snippet in `libntfs-3g/attrib.c`.
