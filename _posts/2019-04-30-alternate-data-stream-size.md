@@ -1,12 +1,16 @@
 ---
 layout: post
-title:  "Yeah, I eat ADS"
+title:  "How many alternate data streams can a file have?"
 date:   2019-04-30 17:38:00 -0500
 categories: windows ntfs
 author: Colin Atkinson
 ---
 
-While I was attempting to write a <s>horrific hack</s> wonderfully elegant piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file. How did I hit this maximum? Just... don't worry about it, ok? Regardless, while looking into this, I found out an even weirder part: that this maximum number actually depends on the length of the streams' names.
+While I was attempting to write a <s>horrific hack</s> wonderfully elegant piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file. How did I hit this maximum? Just... don't worry about it, ok?
+
+While looking into this, I found out an even weirder part: that this maximum number actually depends on the length of the streams' names.
+
+## What the heck is an ADS?
 
 Alternate Data Streams are a lesser known bit of NTFS weirdness. They're similar to xattrs on Linux, except you don't need a special API to read and write data to them. Just pop them open like any other file. They are also extremely similar to macOS resource forks--in fact, they were originally created for compatibility between the two systems.
 
@@ -27,11 +31,13 @@ ADSes are stored as part of a file's Master File Table (MFT) records. The MFT is
 
 The `$DATA` attribute header contains much what you would expect--its own length, the length of any data it is storing internally, the cluster numbers of the data it is storing externally, and so on. It also, however, has fields for an optional name for itself. See, the "real file" is a stream just like all the ADSes--it's just unnamed. Thus, another common thing to call ADSes is "named streams."
 
-## The Weird Part
+## The weird part
 
-There seems to be a maximum number of named streams per file. This in and of itself isn't that strange: the error code returned is `ERROR_FILE_SYSTEM_LIMITATION (0x299)`, which I guess, like, fair enough NTFS. You do you homie. The weird part is that this number seems to vary with the length of the streams' names.
+As I mentioned, there seems to be a maximum number of named streams per file. This in and of itself isn't that strange: the error code returned is `ERROR_FILE_SYSTEM_LIMITATION (0x299)`, which I guess, like, fair enough. You don't want some rogue application taking up a bunch of disk space or degrading performance. But the part I just couldn't understand is this maximum seems to vary with the length of the streams' names.
 
-### The Proof
+### The proof
+
+This behavior can be demonstrated fairly easily with a simple script (since they really can be used like most other files).
 
 ```python
 {% include_relative scripts/named_streams.py %}
@@ -39,7 +45,7 @@ There seems to be a maximum number of named streams per file. This in and of its
 
 ## Testing
 
-This will output something like
+Running the script will output something like
 
 ```bash
 $ python named_streams.py
@@ -77,15 +83,9 @@ This suggests one of two things:
 
 Either way, at least we know that somewhere in some actually accessible code, there is an explanation for this weirdness.
 
-### Hypothesis: It's related to cluster size
+I tried changing the cluster size and increasing the size of the MFT zone. However, neither of these seemed to change anything--the results were exactly the same. So it's not something that varies per-system.
 
-It seems entirely reasonable that NTFS has a limit on how many clusters to allocate for a given file's MFT entries. This, however does not seem to be the case. Repeating the commands above, adding the `--cluster-size 8192` option to mkfs.ntfs does not seem to have an affect.
-
-### Hypothesis: It's related to MFT size
-
-Again, repeat the above commands and add `-z 4` (MFT takes up 50% of the disk) to `mkfs.ntfs`. However, it still appears to make no difference.
-
-### A Clue
+## A clue
 
 I decided I might as well check the system logs for any hints as to what `ntfs-3g` was doing. A quick `journalctl` later, and...
 
@@ -109,7 +109,7 @@ if (type == AT_ATTRIBUTE_LIST && size > 0x40000) {
 }
 ```
 
-What seems to be happening is that as we add more and more ADSes, the MFT entry eventually has to resort to using `$ATTRIBUTE_LIST` so that the entry can be split across multiple blocks. Something that isn't mentioned in the NTFS documentation, however, is that `$ATTRIBUTE_LIST` itself actually has a maximum size.
+What seems to be happening is that as we add more and more ADSes, the MFT entry eventually has to resort to using `$ATTRIBUTE_LIST` so that the entry can be split across multiple blocks. But it seems that `$ATTRIBUTE_LIST` has an undocumented size limit.
 
 Since this seems to be a fairly arbitrary limitation, let's see what happens if we change this value to, say `0x80000` instead.
 
@@ -132,15 +132,36 @@ And in [The Four Stages of NTFS File Growth, Part 2](https://blogs.technet.micro
 
 > NOTE: The diagram shows the attribute list as being smaller than the 1kb file record. And while it is true that it starts out that way, the upper limitation of the attribute list is 256kb.
 
-Since the names of streams take up space in the MFT entry, it makes sense that longer names fill up the child entries referred to by `$ATTRIBUTE_LIST` more quickly. Thus leading to more entries being added, and thus hitting the 256kb limit more quickly. So really, it was in fact a literal limitation of the filesystem.
+## `$ATTRIBUTE_WHAT`?
+
+In a simple file, the MFT record contains a bunch of attributes and their data (or a pointer to that data). In a more complex file, the record instead contains a list of pointers to *other* records which actually contain the attributes. This is the `$ATTRIBUTE_LIST` entry. As an aside, the `$ATTRIBUTE_LIST` itself can be made non-resident, too. NTFS supports a lot of layers of indirection.
+
+Normally, this only becomes relevant with very large, fragmented, or sparse files (see [this post from mssql-support](https://techcommunity.microsoft.com/t5/SQL-Server-Support/Operating-System-Error-665-8211-File-System-Limitation-Not-just/ba-p/318587) for some "common" situations in which this can happen).
+
+## Let's check it out
+
+The obvious conclusion is that stream names take up space in `$ATTRIBUTE_LIST`--however, I couldn't find any documentation on this. Let's see...
+
+```bash
+ntfscat ntfs.img a.txt -a 0x20 > attr.bin  # 0x20 is the id of ATTRIBUTE_LIST
+
+# Let's pick a random hash that we generated
+# The chances of it occurring randomly are infinitesimal
+# Note that the names are UTF-16, thus this terrible sed hack
+sed 's/\x00//g' attr.bin | grep 7f2253d7e228b22a08bda1f09c516f6fead81df6536eb02fa991a34bb38d9be8
+```
+
+This should print "Binary file (standard input) matches" if all went well.
+
+You can change the hash value to any of the hashes our script generated, and it should still match. I think it's a fair conclusion that the attribute list does actually contain stream names.
+
+Since the size of these structures is capped not based on the number of entries, but on raw size, it suddenly makes sense that longer stream names will exhaust our 256kb more quickly.
 
 ## Conclusion
 
 So in conclusion, it's a weird undocumented limitation that was likely added for performance reasons, and then faithfully duplicated by NTFS-3G.
 
 I guess that the real lesson here is that if you play stupid games (writing thousands of ADSes), you win stupid prizes (things breaking). But, on the plus side I learned a lot about NTFS that I will realistically never use in my life.
-
-# TODO: Finish
 
 ## Further Resources
 
