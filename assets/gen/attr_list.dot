@@ -1,0 +1,27 @@
+digraph mft {
+    node [shape=record,fillcolor=white,style="filled,solid"];
+    graph [rankdir="LR"];
+    bgcolor="#ffffff00"
+
+    base_rec [label="Base Record | {$FILE_NAME | a.txt} | Other resident attrs | {$ATTRIBUTE_LIST | <f0> }"];
+
+    attr_list [label="<e> $ATTRIBUTE_LIST | { Entry 0 | <f0> } | { Entry 1 | <f1> }"];
+
+    base_rec:f0 -> attr_list:e;
+
+    child_req0 [label="<e> Child Record | $DATA | <f0> | <f1>"];
+    attr_list:f0 -> child_req0:e;
+
+    child_req1 [label="<e> Child Record | $DATA | <f0> | <f1>"];
+    attr_list:f1 -> child_req1:e;
+
+    data0 [label="Data"];
+    data1 [label="Data"];
+    child_req0:f0 -> data0;
+    child_req0:f1 -> data1;
+
+    data2 [label="Data"];
+    data3 [label="Data"];
+    child_req1:f0 -> data2;
+    child_req1:f1 -> data3;
+}

@@ -157,7 +157,10 @@ In a more complex file however, the record instead contains a list of pointers t
 
 Of course, the `$ATTRIBUTE_LIST` itself can be made non-resident, too. A file can have a pointer to an attribute list, which contains pointers to attributes, which contain pointers to their associated data--and I might be missing some pointers in there. It's just pointers all the way down.
 
-### TODO: Insert diagram
+<picture>
+    <source srcset="/assets/gen/attr_list.dot.svg" type="image/svg+xml" />
+    <img src="/assets/gen/attr_list.dot.png" alt="A diagram showing MFT entry indirection" />
+</picture>
 
 Normally, this only becomes relevant with very large, fragmented, or sparse files (see [this post from mssql-support](https://techcommunity.microsoft.com/t5/SQL-Server-Support/Operating-System-Error-665-8211-File-System-Limitation-Not-just/ba-p/318587) for some "common" situations in which this can happen). But since each named stream creates its own `$DATA` attribute, the `$ATTRIBUTE_LIST` was filling up rather quickly.
 
