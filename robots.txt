@@ -1,2 +1,3 @@
+Sitemap: https://colatkinson.site/sitemap.xml
 User-agent: *
 Disallow:
