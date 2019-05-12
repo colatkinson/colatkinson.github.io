@@ -88,7 +88,7 @@ I began the onerous process of looking through the `ntfs-3g` source. But I didn'
 
 ## A clue
 
-I noticed that throughout the code, errors actually got output to the system log. Maybe that could point me in the right direction. Lo and behold...
+I noticed that throughout the code, errors actually got output to the system log. Maybe that could point me in the right direction. I opened up the logs and immediately found these lines.
 
 ```
 Too large attrlist (262208): Numerical result out of range
@@ -96,7 +96,7 @@ ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of ra
 Failed to add resident attribute: Numerical result out of range
 ```
 
-I reran my script while I had the logs open in follow mode, and out popped the same message. I was on to something. I grepped the source for "Too large attrlist," and found the following snippet in `libntfs-3g/attrib.c`.
+That certainly looked like it could be related. Something, somewhere was overflowing. But maybe it was unrelated--you never know. I reran my testing script, and out popped the same message. I was on to something. I searched the source for "Too large attrlist," and found the following snippet in `libntfs-3g/attrib.c`.
 
 ```c
 /*
@@ -110,9 +110,9 @@ if (type == AT_ATTRIBUTE_LIST && size > 0x40000) {
 }
 ```
 
-It seemed that the script was hitting the maximum size of the file's `$ATTRIBUTE_LIST` (more on that later). What would changing that hardcoded value do? Would it change the number of named streams? Or would it break things in wholly unexpected ways?
+This was it--the source of the limit. It seemed that the script was hitting the maximum size of the file's `$ATTRIBUTE_LIST`, one of the bits of data in its MFT entry. I wanted to be sure, though. But what would changing that magic value do? Would it actually change the number of named streams?
 
-I changed it to `0x80000`, compiled, and remounted my image. Then ran the script.
+I changed it to `0x80000`, compiled, and remounted my image. I ran the script again.
 
 ```bash
 $ ~/named_streams.py
@@ -123,9 +123,9 @@ d.txt 10920
 e.txt 13110
 ```
 
-It actually worked! Not only did our numbers increase, they increased almost exactly twofold.
+It actually worked! Not only did the number of streams increase, it almost exactly doubled. That `0x40000` was without a doubt the limit I was hitting. But that still didn't explain how the streams' names got dragged into this.
 
-## Why 262144?
+## But first: why 262144?
 
 I mean, it's a pretty good number. So why *not* 262144?
 
@@ -147,7 +147,7 @@ And on [another line](https://github.com/torvalds/linux/blob/8148c17b179d8acad19
 
 So presumably, `$ATTRIBUTE_LIST` needs to be less than 256kb so it can be cached easily. While that just pushed the magic number up a level, it did give a satisfyingly pragmatic reason for that number being used by NTFS.
 
-## `$ATTRIBUTE_WHAT`?
+## What the heck is an `$ATTRIBUTE_LIST`?
 
 I'd determined that the ADSes were filling up the MFT entry's `$ATTRIBUTE_LIST`. But what exactly is that anyway?
 
@@ -164,34 +164,36 @@ Of course, the `$ATTRIBUTE_LIST` itself can be made non-resident, too. A file ca
 
 Normally, this only becomes relevant with very large, fragmented, or sparse files (see [this post from mssql-support](https://techcommunity.microsoft.com/t5/SQL-Server-Support/Operating-System-Error-665-8211-File-System-Limitation-Not-just/ba-p/318587) for some "common" situations in which this can happen). But since each named stream creates its own `$DATA` attribute, the `$ATTRIBUTE_LIST` was filling up rather quickly.
 
-## Let's check it out
+## Poking it with a stick
 
 The tl;dr version is that `$ATTRIBUTE_LIST` contains all of the data attributes, and their name metadata. So longer names take up more raw space in the attribute list, and badabing badaboom `ERROR_FILE_SYSTEM_LIMITATION`.
 
-I couldn't actually find sources anywhere confirming this, though. Since I was curious about the structure of the attribute list anyway, I figured I might as well give my theory the last bit of confirmation.
+While it was a nice theory, I couldn't actually find sources anywhere confirming that stream names were stored there. So it was still just that, a theory. Since I was curious about the structure of the attribute list anyway, I figured I might as well do the last bit of legwork to put all this to rest.
 
-I first dumped the raw bytes of the `$ATTRIBUTE_LIST` using the `ntfscat` tool that comes with `ntfs-3g`. Note that 0x20 is the magic id byte for this field.
+I first dumped the raw bytes of the `$ATTRIBUTE_LIST` using the `ntfscat` tool that comes with `ntfs-3g`. Note that 0x20 is the magic byte that identifies an MFT entry as an attribute list.
 
 ```bash
 $ ntfscat ntfs.img a.txt -a 0x20 > attr.bin
 ```
 
-I picked one of the SHA256 hashes generated at random. While I couldn't tell you the exact odds of a collision, it falls somewhere in the ballpark of "I quantum tunneled onto a billionaire's yacht, then got dealt a royal flush." So probably good enough for these purposes.
+I picked one of the SHA256 hashes generated at random. While I couldn't tell you the exact odds of a collision, it falls somewhere in the ballpark of "I quantum tunneled onto a billionaire's yacht, then joined their poker game and got dealt a royal flush." So probably good enough for these purposes.
 
-Since grep doesn't support UTF-16, I initially used this hack.
+Since grep doesn't support UTF-16, I initially used a hack; `sed` removes the upper 8 bits of each UTF16 character, leaving us with ASCII-ish text.
 
 ```bash
 $ sed 's/\x00//g' attr.bin | grep 7f2253d7e228b22a08bda1f09c516f6fead81df6536eb02fa991a34bb38d9be8
+Binary file (standard input) matches
 ```
 
-This output "Binary file (standard input) matches." So it appears stream names are in the attribute list after all! I double-checked this manually, and yup, that sure looks like a whole lot of hashes.
+It appears stream names are in the attribute list after all! I double-checked this manually, and yup, that sure looks like a whole lot of hashes.
 
 ![The `$ATTRIBUTE_LIST` dump open in vim](/assets/img/attribute_list_vim.png)
 
-As a sidenote, [ripgrep](https://github.com/BurntSushi/ripgrep) apparently has actual encoding support:
+As a side note, I later found out that [ripgrep](https://github.com/BurntSushi/ripgrep) has good text encoding support, even when searching binary files.
 
 ```bash
 $ rg -E "UTF-16LE" 7f2253d7e228b22a08bda1f09c516f6fead81df6536eb02fa991a34bb38d9be8 attr.bin
+Binary file matches (found "\u{0}" byte around offset 1)
 ```
 
 ## Conclusion
