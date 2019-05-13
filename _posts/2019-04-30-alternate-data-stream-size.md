@@ -96,7 +96,7 @@ ntfs_non_resident_attr_expand_i: bounds check failed: Numerical result out of ra
 Failed to add resident attribute: Numerical result out of range
 ```
 
-That certainly looked like it could be related. Something, somewhere was overflowing. But maybe it was unrelated--you never know. I reran my testing script, and out popped the same message. I was on to something. I searched the source for "Too large attrlist," and found the following snippet in `libntfs-3g/attrib.c`.
+Something, somewhere was hitting a maximum of some kind, which sounded a whole lot like it was part of the named stream limit. But maybe it was unrelated--you never know. I reran my testing script, and out popped the same message. I was on to something. I searched the source for "Too large attrlist," and found the following snippet in `libntfs-3g/attrib.c`.
 
 ```c
 /*
@@ -110,7 +110,7 @@ if (type == AT_ATTRIBUTE_LIST && size > 0x40000) {
 }
 ```
 
-This was it--the source of the limit. It seemed that the script was hitting the maximum size of the file's `$ATTRIBUTE_LIST`, one of the bits of data in its MFT entry. I wanted to be sure, though. But what would changing that magic value do? Would it actually change the number of named streams?
+This was it--the source of the limit. A hardcoded size limit of `0x40000` for the file's `$ATTRIBUTE_LIST`, one of the bits of data in its MFT entry. I still wanted to be sure that this was really the root cause, though. Would changing that magic value actually change the number of named streams, or was it just a red herring?
 
 I changed it to `0x80000`, compiled, and remounted my image. I ran the script again.
 
@@ -166,7 +166,7 @@ Normally, this only becomes relevant with very large, fragmented, or sparse file
 
 ## Poking it with a stick
 
-The tl;dr version is that `$ATTRIBUTE_LIST` contains all of the data attributes, and their name metadata. So longer names take up more raw space in the attribute list, and badabing badaboom `ERROR_FILE_SYSTEM_LIMITATION`.
+The tl;dr version is that `$ATTRIBUTE_LIST` contains all of the data attributes, and their name metadata. So longer names take up more raw space in the attribute list, and badabing badaboom you've got an `ERROR_FILE_SYSTEM_LIMITATION`.
 
 While it was a nice theory, I couldn't actually find sources anywhere confirming that stream names were stored there. So it was still just that, a theory. Since I was curious about the structure of the attribute list anyway, I figured I might as well do the last bit of legwork to put all this to rest.
 
