@@ -11,7 +11,7 @@ image_desc: "Sample terminal output for writing to and reading from an ADS"
 
 While I was attempting to write a <s>horrific hack</s> beautiful piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file.
 
-While looking into this, I found an even stranger part, even by "undocumented Windows behavior" standards: that this maximum number actually depends on the length of the streams' names. Now this just didn't make sense to me, and since I didn't have anything better to do with my time, I decided to investigate.
+But from there I ran into something even stranger, something bizarre even by "undocumented Windows behavior" standards: that this maximum number actually depends on the length of the streams' names. Now this just didn't make sense to me, and since I didn't have anything better to do with my time, I decided to investigate.
 
 ## What the heck is an ADS?
 
@@ -38,7 +38,7 @@ The `$DATA` attribute header contains much what you would expect--its own length
 
 ## The weird part
 
-As I mentioned, there seems to be a maximum number of named streams per file. This in and of itself isn't that strange: the error code returned is `ERROR_FILE_SYSTEM_LIMITATION (0x299)`, which I guess, like, fair enough. You don't want some rogue application taking up a bunch of disk space or degrading performance. But the part I just couldn't understand is this maximum seems to vary with the length of the streams' names.
+As I mentioned, there seems to be a maximum number of named streams per file. This in and of itself isn't that strange: the error code returned is `ERROR_FILE_SYSTEM_LIMITATION (0x299)`. Which I guess, like, fair enough; you don't want some rogue application taking up a bunch of disk space or degrading performance. But the part I just couldn't understand is this maximum seems to vary with the length of the streams' names.
 
 ### The proof
 
