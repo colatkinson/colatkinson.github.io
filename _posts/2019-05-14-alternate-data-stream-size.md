@@ -2,7 +2,7 @@
 layout: post
 title:  "How many alternate data streams can a file have?"
 description: "A deep dive into the data structures that make Windows work."
-date:   2019-04-30 17:38:00 -0500
+date:   2019-05-14 02:00:00 -0400
 categories: windows ntfs
 author: Colin Atkinson
 image: /assets/img/attr_list_example.png
