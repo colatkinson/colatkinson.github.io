@@ -11,11 +11,11 @@ image_desc: "Sample terminal output for writing to and reading from an ADS"
 
 While I was attempting to write a <s>horrific hack</s> beautiful piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file.
 
-While looking into this, I found an even stranger part, even by "undocumented Windows behavior" standards: that this maximum number actually depends on the length of the streams' names. Now this just didn't make sense to me, and since I don't have anything better to do with my time, I decided to investigate.
+While looking into this, I found an even stranger part, even by "undocumented Windows behavior" standards: that this maximum number actually depends on the length of the streams' names. Now this just didn't make sense to me, and since I didn't have anything better to do with my time, I decided to investigate.
 
 ## What the heck is an ADS?
 
-Alternate Data Streams are a lesser known bit of NTFS weirdness. They're similar to xattrs on Linux, except you don't need a special API to read and write data to them. Just pop them open like any other file. They are also extremely similar to macOS resource forks--in fact, they were originally created for compatibility between the two systems.
+Alternate Data Streams are a lesser known bit of NTFS weirdness. They're similar to xattrs on Linux, except you don't need a special API to read and write data to them. Just pop them open like any other file. They are also extremely similar to macOS's HFS resource forks--in fact, they were originally created for interoperability between the two filesystems.
 
 The tl;dr version is as follows:
 
@@ -28,11 +28,13 @@ $ more < file.txt:ads
 yo yo yo
 ```
 
-ADSes are not included in the file's size when you run `dir` or `ls`. Nor are they included in directory listings by default. They can be shown by calling `dir /r`, or with the Sysinternals `streams.exe` tool. And if you're feeling ambitious, you can even use the C `FindFirstStreamW` and `FindNextStreamW` functions to find them yourself.
+These alternate streams are not shown in directory listings by default, unless you run `dir` with the `/a` flag. They can also be enumerated using the `FindFirstStreamW` and `FindNextStreamW` Win32 functions if you're actually using them in application code.
 
-ADSes are stored as part of a file's Master File Table (MFT) records. The MFT is exactly what it sounds like--the place in NTFS where all of your files' metadata (and some actual data) live. In addition to the boring stuff like file names, creation time, and DOS attributes, MFT file records house one or more `$DATA` attributes.
+Because they don't show up in obvious ways, malware often used ADSes as a way of hiding itself in older versions of Windows. The main executable would copy itself into an ADS, so even if an antivirus program attempted to srub the system, as long as that ADS and a small stub script weren't detected, the system could be reinfected. But they also have plenty of legitimate uses. The `Zone.Identifier` stream lets applications make security decisions based on where a file came from. Dropbox also uses ADSes to write unique identifiers to disk. SQL Server used to use them for integrity checking. Basically, if an application has a some bit of data and doesn't have anywhere better to put it, it ends up in an ADS.
 
-The `$DATA` attribute header contains much what you would expect--its own length, the length of any data it is storing internally, the cluster numbers of the data it is storing externally, and so on. It also, however, has fields for an optional name for itself. See, the "real file" is a stream just like all the ADSes--it's just unnamed. Thus, another common thing to call ADSes is "named streams."
+ADSes are stored as part of a file's Master File Table (MFT) records. The MFT is where NTFS stores your files' metadata (and some of their actual data). In addition to the boring stuff like file names, creation time, and DOS attributes, MFT records for files house one or more `$DATA` attributes.
+
+The `$DATA` attribute header contains much what you would expect--its own length, the length of any data it is storing internally, the cluster numbers of the data it is storing externally, and so on. It also, however, has fields for an optional name for itself, separate from the "traditional" file name. See, the "real" file is a stream just like all the ADSes--it's just unnamed. That's why another common thing to call ADSes is "named streams."
 
 ## The weird part
 
@@ -148,7 +150,7 @@ And on [another line](https://github.com/torvalds/linux/blob/8148c17b179d8acad19
 
 > Also, each security descriptor is stored twice in the $SDS stream with a fixed offset of 0x40000 bytes (256kib, the Windows cache manager's max size) between them...
 
-So presumably, `$ATTRIBUTE_LIST` needs to be less than 256kb so it can be cached easily. While that just pushed the magic number up a level, it did give a satisfyingly pragmatic reason for that number being used by NTFS.
+So presumably, `$ATTRIBUTE_LIST` needs to be less than 256kb so it can be cached easily. While that just pushed the magic number up a level, it did give a satisfyingly pragmatic reason for that number to be used by NTFS.
 
 ## What the heck is an `$ATTRIBUTE_LIST`?
 
