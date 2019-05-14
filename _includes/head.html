@@ -38,9 +38,9 @@
     {% endif %}
 
     {% if page.image %}
-        <meta content="/img/srcset/{{ page.image }}" property="og:image">
+        <meta content="{{ site.url }}{{ page.image }}" property="og:image">
     {% else %}
-        <meta content="{{ site.url }}/assets/logo_hires.png" property="og:image">
+        <meta content="{{ site.url }}/assets/gen/logo_hires.png" property="og:image">
         <meta content="1200" property="og:image:width">
         <meta content="1200" property="og:image:height">
     {% endif %}
