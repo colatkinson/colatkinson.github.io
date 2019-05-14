@@ -1,9 +1,12 @@
 ---
 layout: post
 title:  "How many alternate data streams can a file have?"
+description: "A deep dive into the data structures that make Windows work."
 date:   2019-04-30 17:38:00 -0500
 categories: windows ntfs
 author: Colin Atkinson
+image: /assets/img/attr_list_example.png
+image_desc: "Sample terminal output for writing to and reading from an ADS"
 ---
 
 While I was attempting to write a <s>horrific hack</s> beautiful piece of code, I stumbled upon an undocumented feature of NTFS alternate data streams. Namely, that you can only associate so many of them with any given file.

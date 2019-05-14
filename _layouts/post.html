@@ -19,6 +19,12 @@ layout: default
     </div>
   </header>
 
+  {% if page.image %}
+    <figure class="post-image">
+      <img src="{{ page.image }}" alt="{{ page.image_desc }}" />
+    </figure>
+  {% endif %}
+
   <div class="post-content" itemprop="articleBody">
     {{ content }}
   </div>
