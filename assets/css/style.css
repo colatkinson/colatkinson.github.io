@@ -119,6 +119,19 @@ code.highlighter-rouge {
     font-size: 0.9em;
 }
 
+/* Disable extra indentation of code blocks on mobile */
+@media only screen and (max-width: 850px) {
+    figure.highlight {
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+}
+
+/* Disable left padding for line numbering */
+.gutter.gl {
+    padding-left: 0px;
+}
+
 .post-image {
     margin-left: 0px;
     margin-right: 0px;
