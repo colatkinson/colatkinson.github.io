@@ -64,19 +64,26 @@ rarely-accessed files. But to implement this, you need a virtual filesystem to
 are[^gdrive_shellext].
 
 So how, you may ask, did Google choose to implement this functionality on
-macOS? Why, by forking osxfuse of course!
+macOS? By forking osxfuse, of course!
 
 As noted in this [GitHub issue](https://github.com/osxfuse/osxfuse/issues/503),
 GDFS and other osxfuse-based systems were incompatible. Essentially, it appears
 that Google basically changed the name of the kernel extension, got a new kext
 signing certificate from Apple, and said, "Fuck it. Ship it." No hate here--we
 all have deadlines to meet, and developing a new kext from scratch is time
-consuming to say the least. I also sincerely doubt that the tiny fraction of
-macOS users who (knowingly) run osxfuse was at the top of the priority list
-during sprint planning. It's easy to see how this slipped through the cracks.
+consuming to say the least. I also have a sneaking suspicion that maintaining
+compatibility with other osxfuse users may not have been at the top of the
+sprint priority list. Or it was a legitimate accident--from what I can tell,
+there's approximately one person on the planet that knows all the nooks and
+crannies of the module. Regardless, it's easy to see how this slipped through
+the cracks.
 
 I believe this was eventually fixed, since I've seen osxfuse and more recent
-versions of GDFS running side by side. But the damage was already done.
+versions of GDFS running side by side.
+
+But the damage was already done. Plenty of other companies use osxfuse, and
+while most don't break things quite as badly or as publicly, they still benefit
+from Fleischer's labor and leave him to clean up any ensuing bugs and messes.
 
 # Hold up, what's a "kext signing certificate?"
 
@@ -86,9 +93,11 @@ They only added an API for adding badge icons to Finder in 2014--and that was
 only because Dropbox just kept reverse engineering it anyway.
 
 Deploying a kernel extension for macOS requires it be signed using a special
-Kernel Extension Signing Certificate, which can only be acquired from Apple
-(after you've joined their developer program and paid your $99, of course). This
-is a special application process that, from what I've heard, is fairly rigorous.
+Kernel Extension Signing Certificate, which can only be acquired from Apple.
+After you've paid your $99 to get into the standard developer program, getting
+one of these certs requires going through an extra application process which,
+as I understand it, is quite rigorous. And of course, there's a high
+probability that you'll be denied at the end of it.
 
 Now Google, when they forked osxfuse, were able to get one of these certs. But
 most software shops don't have hundreds of billions of dollars in yearly
