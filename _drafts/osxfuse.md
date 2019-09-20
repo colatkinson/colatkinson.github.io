@@ -4,6 +4,8 @@ title: "osxfuse is no longer open source"
 description: "And what that means for the rest of us."
 categories: macos fuse
 author: Colin Atkinson
+image: /assets/img/osxfuse.png
+image_desc: "RIP to a legend"
 ---
 
 FUSE for macOS (or, the kernel extension formerly known as osxfuse) is a project
