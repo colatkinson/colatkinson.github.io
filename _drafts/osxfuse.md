@@ -20,6 +20,37 @@ source. For some previous discussion, check
 [here](https://groups.google.com/forum/#!msg/osxfuse-group/_5PBFQ_BQB8/z1mu2H0rFAAJ),
 and [here](https://github.com/osxfuse/osxfuse/issues/616).
 
+Some choice moments for those without the energy for programmer drama:
+
+> > The osxfuse-3.9.0 tag shows an empty directory:
+> > https://github.com/osxfuse/osxfuse/tree/osxfuse-3.9.0
+> >
+> > Checking out with git also produces an empty directory.
+> > The archives from there releases page are also empty, i.e.
+> > https://github.com/osxfuse/osxfuse/archive/osxfuse-3.9.0.zip
+>
+> That's on purpose. If you are using FUSE for macOS for a commercial software
+> project, feel free to contact me via email. You can find my email on my GitHub
+> page.
+>
+> -- [@bfleischer](https://github.com/osxfuse/osxfuse/issues/590#issuecomment-492226726)
+
+> Have you ever written a single line of kernel code or debugged a massively
+> parallel file system? Trust me, that's a big deal.
+>
+> -- [@bfleischer](https://github.com/osxfuse/osxfuse/issues/590#issuecomment-501809602)
+
+> > This is simply too much work for one person in addition to a full-time job
+>
+> Then drop it and let someone else maintain it.
+>
+> -- [@pmetzger](https://github.com/osxfuse/osxfuse/issues/590#issuecomment-503318278)
+
+That's right, we've got ourselves a new season of *The Real Housewives of
+GitHub!* That being said, this actually is a pretty serious issue, and
+[@pmetzger](https://github.com/pmetzger), as a maintainer for
+[MacPorts](https://www.macports.org/), has every right to be concerned.
+
 We'll get into why, and how, this happened. But first, some background.
 
 # FUSE: What even is that?
@@ -47,43 +78,6 @@ Linux have far more similar sets of file operations thanks to POSIX. MacFUSE was
 started at Google in 2007 and, from what I can tell, was abandoned sometime
 around 2009. osxfuse was then forked from it around 2011, and has been the only
 solution for running your FUSE on macOS since then.
-
-# Re-enter Google
-
-Google has started to get serious about the whole cloud file storage schtick,
-and one of their more enterprise-facing products is [Google Drive File
-Stream](https://support.google.com/a/answer/7491144?hl=en). Instead of just
-exposing a web UI, GDFS actually exposes your files locally, similar to
-Dropbox.
-
-Unlike Dropbox, GDFS downloads files on an as-needed basis[^smart_sync]. So if I
-have 10 GB of movies in my Drive, none of that 10 GB is actually used until I
-open one of those files. This is great for users, especially those with lots of
-rarely-accessed files. But to implement this, you need a virtual filesystem to
-"trick" applications into thinking your files are there before they actually
-are[^gdrive_shellext].
-
-So how, you may ask, did Google choose to implement this functionality on
-macOS? By forking osxfuse, of course!
-
-As noted in this [GitHub issue](https://github.com/osxfuse/osxfuse/issues/503),
-GDFS and other osxfuse-based systems were incompatible. Essentially, it appears
-that Google basically changed the name of the kernel extension, got a new kext
-signing certificate from Apple, and said, "Fuck it. Ship it." No hate here--we
-all have deadlines to meet, and developing a new kext from scratch is time
-consuming to say the least. I also have a sneaking suspicion that maintaining
-compatibility with other osxfuse users may not have been at the top of the
-sprint priority list. Or it was a legitimate accident--from what I can tell,
-there's approximately one person on the planet that knows all the nooks and
-crannies of the module. Regardless, it's easy to see how this slipped through
-the cracks.
-
-I believe this was eventually fixed, since I've seen osxfuse and more recent
-versions of GDFS running side by side.
-
-But the damage was already done. Plenty of other companies use osxfuse, and
-while most don't break things quite as badly or as publicly, they still benefit
-from Fleischer's labor and leave him to clean up any ensuing bugs and messes.
 
 # Hold up, what's a "kext signing certificate?"
 
@@ -113,7 +107,7 @@ ol' Benny. What can I say, the man's a celebrity.
 So to quickly summarize:
 
 1. osxfuse is used by tons of companies,
-2. sometimes in stupid, selfish ways.
+2. [sometimes in stupid, selfish ways](https://github.com/osxfuse/osxfuse/issues/503).
 3. Fleischer has been the sole maintainer for years.
 4. He also hasn't been paid a penny for this work.
 5. He also holds a magical, aluminum unibody certificate that prevents most
@@ -145,12 +139,13 @@ get his.
 # So to summarize again
 
 1. Apple does Apple things and heavily restricts third-party developers.
-2. But not Google tho lol.
-3. Fleischer, having dealt with malarkey like this for close to a decade,
+2. Fleischer, having dealt with malarkey like this for close to a decade,
    realizes he doesn't get paid enough for this shit.
-4. He makes the repo closed source in 2017, but doesn't mention this to anyone.
-5. In 2019, after making a bunch of critical changes to the code, he quietly
+3. He makes the repo closed source in 2017, but doesn't mention this to anyone.
+4. In 2019, after making a bunch of critical changes to the code, he quietly
    announces that the licensing terms of the project are now different.
+5. At this stage in the proceedings, companies' choices are to pay up or tell
+   their users that they can't use the hot new version of macOS.
 
 As far as monetization strategies go, love it or hate it, you've got to give the
 guy props.
@@ -164,7 +159,7 @@ changes are made to this part of the code, it already meets the requirements for
 source code distribution.
 
 Now I'm not a lawyer (yada yada this shouldn't be considered legal advice), but
-it seems like all of this is perfectly legal.
+it seems like all of this is perfectly above board.
 
 # Isn't there a better way?
 
@@ -209,6 +204,8 @@ this doesn't become the new normal. In the meantime, consider sending a couple
 bucks to the maintainer of your favorite project. And maybe use a copyleft
 license next time you release some code, so that when some random company wants
 to use it, you can finagle a cut of the action.
+
+*Trust me, it's a big deal.*
 
 
 ---
