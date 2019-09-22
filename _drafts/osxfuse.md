@@ -53,6 +53,13 @@ GitHub!* That being said, this actually is a pretty serious issue, and
 [@pmetzger](https://github.com/pmetzger), as a maintainer for
 [MacPorts](https://www.macports.org/), has every right to be concerned.
 
+You may also notice that I've only linked to random GitHub issues and mailing
+list posts. That's because this licensing change hasn't been noted in the
+[README](https://github.com/osxfuse/osxfuse/blob/master/README.md) or
+[LICENSE](https://github.com/osxfuse/osxfuse/blob/master/LICENSE.txt) files of
+the repo--that is, the most obvious (i.e. only) places that people check for
+these sorts of things.
+
 We'll get into why, and how, this happened. But first, some background.
 
 # FUSE: What even is that?
@@ -64,9 +71,9 @@ simplifies the development process, since you have access to all of the normal
 libraries and utilities you use in desktop development. It was mainlined way
 back in 2005, and even then it wasn't a new concept[^hurd].
 
-Some notable FUSEs are Google Drive's File Stream, sshfs, Keybase's KBFS, and
-ntfs-3g. The point is, this is a piece of technology that has been used and
-abused endlessly, and that a ton of projects depend on.
+Some notable FUSEs are Google Drive's File Stream[^gdrive], sshfs, Keybase's
+KBFS, and ntfs-3g. The point is, this is a piece of technology that has been
+used and abused endlessly, and that a ton of projects depend on.
 
 # But what about macOS?
 
@@ -81,23 +88,27 @@ started at Google in 2007 and, from what I can tell, was abandoned sometime
 around 2009. osxfuse was then forked from it around 2011, and has been the only
 solution for running your FUSE on macOS since then.
 
-# Hold up, what's a "kext signing certificate?"
+osxfuse is, by necessity, a kernel module (or "kext" in Apple land). Using the
+BSD VFS interface, it presents itself as a traditional filesystem driver, and
+then forwards filesystem operations across the kernel boundary to the FUSE. At
+this high level, it operates very similarly to FUSE on Linux, though obviously
+there are some differences at the lower levels. Since it's a kext, shipping it
+to users requires some special provisions.
+
+# Much Ado About Signing
 
 Now this may come as a shock to some of you, but Apple *really* doesn't seem to
 like it when third party developers change just about anything about their UX.
 They only added an API for adding badge icons to Finder in 2014--and that was
 only because Dropbox just kept reverse engineering it anyway.
 
-Deploying a kernel extension for macOS requires it be signed using a special
-Kernel Extension Signing Certificate, which can only be acquired from Apple.
-After you've paid your $99 to get into the standard developer program, getting
-one of these certs requires going through an extra application process which,
-as I understand it, is quite rigorous. And of course, there's a high
-probability that you'll be denied at the end of it.
-
-Now Google, when they forked osxfuse, were able to get one of these certs. But
-most software shops don't have hundreds of billions of dollars in yearly
-revenue, and would presumably face more scrutiny.
+Deploying a kext requires it be signed using a special Kernel Extension Signing
+Certificate, which can only be acquired from Apple. Getting one of these certs
+requires going through a fairly rigorous application process. And of course, at
+the end of it all, you can be denied with no real recourse. Basically, your
+project lives and dies at the will of Apple--a markedly different approach from
+what you're used to if you're used to the Linux and Windows approaches to
+third-party kernel modules.
 
 Now here's the kicker: Benjamin Fleischer has one of these certificates for
 osxfuse. In fact, if you google his name, the vast majority of the results are
@@ -109,7 +120,7 @@ ol' Benny. What can I say, the man's a celebrity.
 So to quickly summarize:
 
 1. osxfuse is used by tons of companies,
-2. [sometimes in stupid, selfish ways](https://github.com/osxfuse/osxfuse/issues/503).
+2. and essentially none of them push fixes upstream.
 3. Fleischer has been the sole maintainer for years.
 4. He also hasn't been paid a penny for this work.
 5. He also holds a magical, aluminum unibody certificate that prevents most
@@ -119,7 +130,7 @@ So to quickly summarize:
 
 It doesn't exactly take a rocket surgeon to see where this is going.
 
-# It gets perfecter
+# But wait, there's more!
 
 Apple has apparently made some pretty significant changes to kernel modules in
 the upcoming macOS Catalina. And according to our subject matter expert,
@@ -205,9 +216,9 @@ world, and while I respect the decisions made in this case, I certainly hope
 this doesn't become the new normal. In the meantime, consider sending a couple
 bucks to the maintainer of your favorite project. And maybe use a copyleft
 license next time you release some code, so that when some random company wants
-to use it, you can finagle a cut of the action.
+to use it, you can finesse a cut of the action.
 
-*Trust me, it's a big deal.*
+While it might not seem like much... *Trust me, it's a big deal.*
 
 
 ---
@@ -217,6 +228,4 @@ to use it, you can finagle a cut of the action.
 
 [^hurd]: FUSE supposedly took its inspiration from the HURD concept of [translators](https://en.wikipedia.org/wiki/GNU_Hurd#Unix_extensions). I found this interesting mostly as a historical oddity--the HURD was actually useful for something!
 
-[^smart_sync]: Notably, Dropbox has responded to this with Project Infinite/Smart Sync, which is quite similar at a technical level.
-
-[^gdrive_shellext]: This isn't technically 100% accurate (at least for Windows). An earlier version of GDFS on Windows actually eschewed a traditional filesystem, opting instead to use an Explorer shell extension to do much the same thing. The code is [available](https://github.com/google/google-drive-shell-extension) if you're into that sort of thing.
+[^gdrive]: *Technically* speaking, GDrive File Stream depends on Google's own fork of osxfuse. But their fork was (for a while, anyway) a bit [too close](https://github.com/osxfuse/osxfuse/issues/503) to the original source, and caused conflicts with other osxfuse-based filesystems. Whoopsie.
