@@ -92,6 +92,10 @@ blockquote {
     padding-left: 0.5em;
 }
 
+blockquote > blockquote {
+    margin-left: 0.1em;
+}
+
 .post img {
     max-width: 100%;
 }
