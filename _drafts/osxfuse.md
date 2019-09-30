@@ -99,8 +99,9 @@ to users requires some special provisions.
 
 Now this may come as a shock to some of you, but Apple *really* doesn't seem to
 like it when third party developers change just about anything about their UX.
-They only added an API for adding badge icons to Finder in 2014--and that was
-only because Dropbox just kept reverse engineering it anyway.
+For instance, they only added an API for adding badge icons to Finder in
+2014--and that was only because Dropbox just kept reverse engineering it
+anyway.
 
 Deploying a kext requires it be signed using a special Kernel Extension Signing
 Certificate, which can only be acquired from Apple. Getting one of these certs
@@ -203,10 +204,10 @@ While some of this may have come off as harsh, it's really not Fleischer with
 whom we should take issue. He wouldn't be the first maintainer to have gripes
 with the ways in which his labor is taken advantage of; nor is he likely to be
 the last. Mongo created the SSPL due to similar issues, and Redis Labs added a
-clause to its license forbidding companies from selling (parts of) its software.
-These aren't directly analogous, not least because things are different in the
-SaaS world. But the root cause is the same: companies often reap far more from
-FOSS than they sow upstream.
+clause to its license forbidding companies from selling (parts of) its
+software.  Now while osxfuse is in a *slightly* different domain than these
+datastores, the root cause is the same: companies often reap far more from FOSS
+than they sow upstream.
 
 All that aside: it would be super cool for osxfuse to be open sourced again, but
 I don't know if I can see that happening in the near future.
@@ -218,7 +219,8 @@ bucks to the maintainer of your favorite project. And maybe use a copyleft
 license next time you release some code, so that when some random company wants
 to use it, you can finesse a cut of the action.
 
-While it might not seem like much... *Trust me, it's a big deal.*
+While in isolation this might seem like a minor issue, if looked at as a
+symptom of a deeper problem... *Trust me, it's a big deal.*
 
 
 ---
