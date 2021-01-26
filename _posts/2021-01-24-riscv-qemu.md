@@ -30,7 +30,12 @@ funsies. But, in chip design, backwards compatibility usually trumps all -- if
 you're running an x86 machine, you have hardware support for 16-bit addressing,
 segmentation, and other such fragments of millenia past.
 
-**TODO: FINISH THIS SECTION OUT**
+You can actually buy some RISC-V boards today --
+[SiFive](https://www.sifive.com/boards) has a few offerings. Or you can run a
+soft core, like [SweRV](https://github.com/chipsalliance/Cores-SweRV) or
+[VexRiscv](https://github.com/SpinalHDL/VexRiscv) on an FPGA. But why spend
+money when you could *not* spend money? Let's see how to set up a RISC-V virtual
+machine with Debian installed.
 
 ## Setting up QEMU
 
@@ -71,7 +76,7 @@ cd debian-rv64
 unzip ../debian-rv64.zip
 ```
 
-### Get the OpenSBI and U-Boot binaries
+## Get the OpenSBI and U-Boot binaries
 
 OpenSBI is a standardized piece of glue for RISC-V platforms to switch from
 firmware mode (M-Mode) up to the kernel layer (S-Mode). Its source code is
@@ -105,7 +110,7 @@ tar xvf data.tar.xz
 cp ./usr/lib/u-boot/qemu-riscv64_smode/uboot.elf ./uboot.elf
 ```
 
-### Make an overlay image
+## Make an overlay image
 
 While not strictly required, this lets you reset the machine to a clean state
 when you inevitably break something.
@@ -114,7 +119,7 @@ when you inevitably break something.
 qemu-img create -o backing_file=image.qcow2,backing_fmt=qcow2 -f qcow2 overlay.qcow2
 ```
 
-### Boot the fucker
+## Boot the damn thing
 
 ```bash
 qemu-system-riscv64 \
@@ -149,7 +154,7 @@ A teardown of this flag menagerie:
 The image is configured with two accounts: `debian` and `root`, both with
 matching passwords.
 
-### SSH access
+## SSH access
 
 The image runs `sshd` by default, which is nice because it lets you get comfier
 terminal access.
@@ -169,3 +174,14 @@ Or using one of the SSH keys included with the image:
 chmod 600 ssh_user_ed25519_key
 ssh debian@localhost -p 2222 -i ssh_user_ed25519_key
 ```
+
+## Playing around
+
+![Screengrab of an SSH session to the VM](/assets/img/riscv_ssh.png)
+
+The world is now your oyster. I was actually surprised at how complete the
+package offering seems to be. You can install OpenJDK, GCC, git, and most
+importantly, cowsay. I did have some issues installing vim, but thankfully,
+neovim was installable without a hitch.
+
+Hopefully this was informative, and best of luck with your real fake hardware!
