@@ -107,7 +107,7 @@ blockquote > blockquote {
 }
 
 .highlight .lineno {
-  color: #ccc;
+  color: #aaa;
   padding: 0 5px;
   border-right: 1px solid #ccc;
   text-align: right;
@@ -127,6 +127,21 @@ blockquote > blockquote {
 
 code.highlighter-rouge {
     font-size: 0.9em;
+}
+
+div.highlight, figure.highlight {
+    background-color: #f4f4f4;
+}
+
+div.highlight {
+    /* Add spacing above and below code blocks so that the background color isn't flush against the other content, especially headers. */
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.highlight pre {
+    /* Add some spacing on the left of the code blocks, so that the code isn't directly against the edge of the background color. */
+    margin-left: 1em;
 }
 
 /* Disable extra indentation of code blocks on mobile */
